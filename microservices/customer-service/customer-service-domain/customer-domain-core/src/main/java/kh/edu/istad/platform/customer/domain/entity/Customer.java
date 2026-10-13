@@ -41,8 +41,9 @@ public class Customer extends AggregateRoot<CustomerId> {
 
 
     public void updateCustomer(String familyName, String givenName){
-        if(familyName == null || givenName == null){
-            throw new CustomerDomainException("Family name and given name must not be null");
+        if(familyName == null || familyName.isBlank()
+                || givenName == null || givenName.isBlank()){
+            throw new CustomerDomainException("Family name and given name must not be blank");
         }
 
         this.familyName = familyName;
@@ -151,6 +152,8 @@ public class Customer extends AggregateRoot<CustomerId> {
     public CustomerStatus getCustomerStatus() {
         return customerStatus;
     }
+
+
 
     @Override
     public boolean equals(Object object) {
