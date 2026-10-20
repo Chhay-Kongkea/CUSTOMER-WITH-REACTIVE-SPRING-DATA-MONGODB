@@ -1,18 +1,21 @@
 package kh.edu.istad.platform.customer.domain.port.out;
 
+import kh.edu.istad.common.domain.valueobject.CustomerId;
 import kh.edu.istad.platform.customer.domain.entity.Customer;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.Optional;
 import java.util.UUID;
 
 public interface CustomerRepository {
 
-    Customer save(Customer customer);
-    Optional<Customer> findById(UUID customerId);
-    boolean existsByUsername(String username);
+    Mono<Customer> save(Customer customer);
+    Flux<Customer> findAll();
 
-    boolean existsByEmail(String email);
-
-    boolean existsByPhoneNumber(String phoneNumber);
+    Mono<Customer> findById(CustomerId id);
+    Mono<Void> deleteById(CustomerId id);
+    Mono<Customer> findByUsername(String username);
+    Flux<Customer> query();
 
 }

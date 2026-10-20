@@ -1,53 +1,74 @@
 
 package kh.edu.istad.platform.customer.persistence.adapter;
 
+import kh.edu.istad.common.domain.valueobject.CustomerId;
 import kh.edu.istad.platform.customer.domain.entity.Customer;
 import kh.edu.istad.platform.customer.domain.port.out.CustomerRepository;
-import kh.edu.istad.platform.customer.persistence.entity.CustomerEntity;
+import kh.edu.istad.platform.customer.persistence.document.CustomerDocument;
 import kh.edu.istad.platform.customer.persistence.mapper.CustomerPersistenceMapper;
-import kh.edu.istad.platform.customer.persistence.repository.CustomerJpaRepository;
+import kh.edu.istad.platform.customer.persistence.repository.CustomerMongoRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Repository;
 
-import java.util.Optional;
-import java.util.UUID;
+import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.stereotype.Repository;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
+
 
 @Repository
 @RequiredArgsConstructor
 public class CustomerRepositoryAdapter implements CustomerRepository {
 
-    private final CustomerJpaRepository customerJpaRepository;
     private final CustomerPersistenceMapper customerPersistenceMapper;
+    private final CustomerMongoRepository customerMongoRepository;
+    private final ReactiveMongoTemplate reactiveMongoTemplate;
 
     @Override
-    public Customer save(Customer customer) {
-        CustomerEntity entity =
-                customerPersistenceMapper.toEntity(customer);
+    public Mono<Customer> save(Customer customer) {
+        CustomerDocument document =
+                customerPersistenceMapper.toDocument(customer);
 
-        CustomerEntity savedEntity =
-                customerJpaRepository.save(entity);
-
-        return customerPersistenceMapper.toDomain(savedEntity);
-    }
-
-    @Override
-    public Optional<Customer> findById(UUID customerId) {
-        return customerJpaRepository.findById(customerId)
+        return customerMongoRepository.save(document)
                 .map(customerPersistenceMapper::toDomain);
     }
 
     @Override
-    public boolean existsByUsername(String username) {
-        return customerJpaRepository.existsByUsername(username);
+    public Flux<Customer> findAll() {
+        return customerMongoRepository.findAll()
+                .map(customerPersistenceMapper::toDomain);
     }
 
     @Override
-    public boolean existsByEmail(String email) {
-        return customerJpaRepository.existsByEmail(email);
+    public Mono<Customer> findById(CustomerId id) {
+        return customerMongoRepository.findById(id)
+                .map(customerPersistenceMapper::toDomain);
     }
 
     @Override
-    public boolean existsByPhoneNumber(String phoneNumber) {
-        return customerJpaRepository.existsByPhoneNumber(phoneNumber);
+    public Mono<Void> deleteById(CustomerId id) {
+        return customerMongoRepository.deleteById(id);
+
+    }
+
+    @Override
+    public Mono<Customer> findByUsername(String username) {
+        return customerMongoRepository.findByUsername(username)
+                .map(customerPersistenceMapper::toDomain);
+    }
+
+    @Override
+    public Flux<Customer> query() {
+
+        Query query = Query.query(
+                Criteria.where("familyName").is("Sim")
+                        .and("username").is("menghor")
+                        .gt(2000)
+        );
+
+        return reactiveMongoTemplate.find(query,CustomerDocument.class)
+                .map(customerPersistenceMapper::toDomain);
     }
 }

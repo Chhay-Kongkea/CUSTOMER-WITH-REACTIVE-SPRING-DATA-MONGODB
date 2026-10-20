@@ -7,5 +7,7 @@ plugins {
 dependencies {
     api('kh.edu.istad:customer-domain-core')
     implementation 'jakarta.transaction:jakarta.transaction-api'
+    implementation 'io.projectreactor:reactor-core'
+
 
 }

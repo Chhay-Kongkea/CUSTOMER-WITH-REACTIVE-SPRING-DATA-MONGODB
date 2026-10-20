@@ -11,7 +11,9 @@ public class BeanConfig {
 
     @Bean
     public CustomerDomainService customerDomainService(){
+
         return new CustomerDomainServiceImpl();
+
     }
 
 

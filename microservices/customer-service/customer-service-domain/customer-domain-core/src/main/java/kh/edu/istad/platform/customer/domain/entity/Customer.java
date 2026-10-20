@@ -21,9 +21,6 @@ public class Customer extends AggregateRoot<CustomerId> {
     private final PhoneNumber phoneNumber;
     private CustomerStatus customerStatus;
 
-
-    // Domain Critical Logic
-
     public void initiateCustomer(){
         validateCustomer();
         super.setId(new CustomerId(UUID.randomUUID()));
@@ -58,7 +55,6 @@ public class Customer extends AggregateRoot<CustomerId> {
 
         customerStatus = CustomerStatus.INACTIVE;
     }
-
 
 
     private Customer(Builder builder) {

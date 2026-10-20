@@ -20,5 +20,5 @@ include 'customer-service-domain:customer-domain-core'
 include 'customer-service-domain:customer-application-service'
 include 'customer-service-restapi'
 include 'customer-service-persistent'
-include 'customer-service-message'
+
 

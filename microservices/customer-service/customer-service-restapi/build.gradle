@@ -6,6 +6,7 @@ plugins {
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-webmvc'
+    implementation 'io.projectreactor:reactor-core'
     api('kh.edu.istad:customer-application-service')
 
 }
