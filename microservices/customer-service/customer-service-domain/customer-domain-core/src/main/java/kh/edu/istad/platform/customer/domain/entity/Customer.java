@@ -10,6 +10,8 @@ import kh.edu.istad.platform.customer.domain.valueobject.PhoneNumber;
 
 import java.util.Objects;
 import java.util.UUID;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Customer extends AggregateRoot<CustomerId> {
 
@@ -20,6 +22,7 @@ public class Customer extends AggregateRoot<CustomerId> {
     private final Email email;
     private final PhoneNumber phoneNumber;
     private CustomerStatus customerStatus;
+    private final Set<UUID> segmentIds = new HashSet<>();
 
     public void initiateCustomer(){
         validateCustomer();
@@ -32,7 +35,17 @@ public class Customer extends AggregateRoot<CustomerId> {
             throw new CustomerDomainException("Customer Id Must Be Null");
         }
         if(customerStatus != null){
-            throw new CustomerDomainException("Customer Id Must Be Null");
+            throw new CustomerDomainException("Customer status must be null when initiating a customer");
+        }
+        if (username == null || username.isBlank()) {
+            throw new CustomerDomainException("Username must not be blank");
+        }
+        if (familyName == null || familyName.isBlank()
+                || givenName == null || givenName.isBlank()) {
+            throw new CustomerDomainException("Family name and given name must not be blank");
+        }
+        if (email == null || phoneNumber == null) {
+            throw new CustomerDomainException("Email and phone number are required");
         }
     }
 
@@ -49,11 +62,26 @@ public class Customer extends AggregateRoot<CustomerId> {
 
 
     public void deActivateCustomer(){
-        if(customerStatus != CustomerStatus.ACTIVE){
-            throw new CustomerDomainException("Can't deactivate, because customer status is not activate");
-        }
+        changeStatus(CustomerStatus.INACTIVE);
+    }
 
-        customerStatus = CustomerStatus.INACTIVE;
+    public void changeStatus(CustomerStatus status) {
+        if (status == null) {
+            throw new CustomerDomainException("Customer status is required");
+        }
+        if (customerStatus == status) {
+            throw new CustomerDomainException("Customer is already " + status);
+        }
+        customerStatus = status;
+    }
+
+    public void assignSegment(UUID segmentId) {
+        if (segmentId == null) throw new CustomerDomainException("Segment id is required");
+        if (!segmentIds.add(segmentId)) throw new CustomerDomainException("Customer is already assigned to this segment");
+    }
+
+    public void removeSegment(UUID segmentId) {
+        if (!segmentIds.remove(segmentId)) throw new CustomerDomainException("Customer is not assigned to this segment");
     }
 
 
@@ -66,6 +94,7 @@ public class Customer extends AggregateRoot<CustomerId> {
         email = builder.email;
         phoneNumber = builder.phoneNumber;
         customerStatus = builder.customerStatus;
+        if (builder.segmentIds != null) segmentIds.addAll(builder.segmentIds);
     }
 
     public static Builder newBuilder() {
@@ -81,6 +110,7 @@ public class Customer extends AggregateRoot<CustomerId> {
         private Email email;
         private PhoneNumber phoneNumber;
         private CustomerStatus customerStatus;
+        private Set<UUID> segmentIds;
 
         private Builder() {
         }
@@ -120,6 +150,8 @@ public class Customer extends AggregateRoot<CustomerId> {
             return this;
         }
 
+        public Builder segmentIds(Set<UUID> val) { segmentIds = val; return this; }
+
         public Customer build() {
             return new Customer(this);
         }
@@ -148,6 +180,8 @@ public class Customer extends AggregateRoot<CustomerId> {
     public CustomerStatus getCustomerStatus() {
         return customerStatus;
     }
+
+    public Set<UUID> getSegmentIds() { return Set.copyOf(segmentIds); }
 
 
 

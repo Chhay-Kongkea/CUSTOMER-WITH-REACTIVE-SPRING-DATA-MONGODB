@@ -9,6 +9,7 @@ import org.springframework.data.domain.Persistable;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.Instant;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -26,6 +27,7 @@ public class CustomerDocument  implements Persistable<String> {
     private String email;
     private String phoneNumber;
     private CustomerStatus customerStatus;
+    private Set<String> segmentIds;
 
 
     @CreatedBy

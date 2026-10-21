@@ -14,6 +14,7 @@ public interface CustomerMapper {
 
     @Mapping(source = "email.value", target = "email")
     @Mapping(source = "phoneNumber.value", target = "phoneNumber")
+    @Mapping(source = "id.id", target = "customerId")
     GetCustomerResult toCustomerResult(Customer customer);
 
 

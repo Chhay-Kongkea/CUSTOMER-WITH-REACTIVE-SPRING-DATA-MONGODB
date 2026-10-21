@@ -1,5 +1,7 @@
 package kh.edu.istad.platform.customer.domain.usecase;
 
+import kh.edu.istad.platform.customer.domain.dto.CustomerFilter;
+import kh.edu.istad.platform.customer.domain.dto.CustomerPageResponse;
 import kh.edu.istad.platform.customer.domain.dto.GetCustomerResult;
 import kh.edu.istad.platform.customer.domain.mapper.CustomerMapper;
 import kh.edu.istad.platform.customer.domain.port.out.CustomerRepository;
@@ -20,8 +22,18 @@ public class GetCustomersUseCase {
     private final CustomerRepository customerRepository;
     private final CustomerMapper customerMapper;
 
-    Flux<GetCustomerResult> getAll(){
-        return customerRepository.findAll().map(customerMapper::toCustomerResult);
+    public Mono<CustomerPageResponse<GetCustomerResult>> execute(CustomerFilter customerFilter){
+        return Mono.zip(
+                        customerRepository.findByFilter(customerFilter).collectList(),
+                        customerRepository.countByFilter(customerFilter))
+                .map(result -> {
+                    int page = customerFilter.normalizedPage();
+                    int size = customerFilter.normalizedSize();
+                    long total = result.getT2();
+                    int pages = (int) Math.ceil((double) total / size);
+                    return new CustomerPageResponse<>(result.getT1().stream()
+                            .map(customerMapper::toCustomerResult).toList(), page, size, total, pages);
+                });
     }
 
 }

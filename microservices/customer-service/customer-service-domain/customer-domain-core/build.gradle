@@ -6,5 +6,4 @@ plugins {
 
 dependencies {
     api('kh.edu.istad:istad-common-domain')
-
 }
